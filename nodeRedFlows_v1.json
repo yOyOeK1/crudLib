@@ -1,0 +1,150 @@
+[
+    {
+        "id": "3a8d43eff1e723e5",
+        "type": "http in",
+        "z": "30a93a76fd1944f1",
+        "name": "GET curl1",
+        "url": "/crud",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 190,
+        "y": 220,
+        "wires": [
+            [
+                "4c26f58a088323f5",
+                "b62c6f0f14885c7c"
+            ]
+        ]
+    },
+    {
+        "id": "ff6fe80bd61653e9",
+        "type": "http response",
+        "z": "30a93a76fd1944f1",
+        "name": "",
+        "statusCode": "",
+        "headers": {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE"
+        },
+        "x": 910,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "4c26f58a088323f5",
+        "type": "function",
+        "z": "30a93a76fd1944f1",
+        "name": "",
+        "func": "\nmsg.topic = msg.payload.queries[0].rawSql;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 410,
+        "y": 240,
+        "wires": [
+            [
+                "b6ca1cbaa442d830"
+            ]
+        ]
+    },
+    {
+        "id": "b62c6f0f14885c7c",
+        "type": "debug",
+        "z": "30a93a76fd1944f1",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 400,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "3b802fabe93ee64c",
+        "type": "http in",
+        "z": "30a93a76fd1944f1",
+        "name": "POST curl1",
+        "url": "/crud",
+        "method": "post",
+        "upload": true,
+        "swaggerDoc": "",
+        "x": 190,
+        "y": 260,
+        "wires": [
+            [
+                "4c26f58a088323f5",
+                "b62c6f0f14885c7c"
+            ]
+        ]
+    },
+    {
+        "id": "d2be6aa930ed7ca0",
+        "type": "debug",
+        "z": "30a93a76fd1944f1",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 850,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "b6ca1cbaa442d830",
+        "type": "mysql",
+        "z": "30a93a76fd1944f1",
+        "mydb": "cbada9e3a1ba45d8",
+        "name": "",
+        "x": 620,
+        "y": 280,
+        "wires": [
+            [
+                "d2be6aa930ed7ca0",
+                "239bfb47bcea1ae3"
+            ]
+        ]
+    },
+    {
+        "id": "239bfb47bcea1ae3",
+        "type": "function",
+        "z": "30a93a76fd1944f1",
+        "name": "",
+        "func": "fields = [];\nvalues = [];\nif( msg.payload.insertId == undefined ){\n    var keys = Object.getOwnPropertyNames( msg.payload[0] );\n    for( var k=0;k<keys.length; k++){\n        fields.push({\"name\": keys[k],\n                    \"type\": \"time\",\n                    \"typeInfo\": {\n                      \"frame\": \"time.Time\"\n                    }});\n        values.push([]);\n    \n        for( var i=0; i<msg.payload.length; i++ ){\n            values[k][i] = msg.payload[i][keys[k]];\n            \n        }\n    }\n}\n\nrefId = msg.req.body.queries[0].refId;\ntr = {\n  \"results\": {\n    refId: {\n      \"frames\": [\n        {\n          \"schema\": {\n            \"refId\": \"A\",\n            \"fields\": fields\n          },\n          \"data\": {\n            \"values\": values\n          }\n        }\n      ]\n    }\n  }\n};\n\nm = tr;\n\nmsg.payload = m;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 790,
+        "y": 280,
+        "wires": [
+            [
+                "ff6fe80bd61653e9",
+                "d2be6aa930ed7ca0"
+            ]
+        ]
+    },
+    {
+        "id": "cbada9e3a1ba45d8",
+        "type": "MySQLdatabase",
+        "name": "",
+        "host": "127.0.0.1",
+        "port": "3306",
+        "db": "svoiysh",
+        "tz": "",
+        "charset": "UTF8"
+    }
+]

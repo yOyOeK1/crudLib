@@ -1,0 +1,113 @@
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="libs/jquery.mobile-1.4.5.min.css">
+
+    <script src="libs/jquery.min.js"></script>
+    <script src="libs/jquery.mobile-1.4.5.min.js"></script>
+    <script src="libs/apiTokens.js"></script>
+    <script src="libs/dbApiHelper.js"></script>
+
+
+<script>
+var crud;
+function cl(st){ console.log(st);}
+
+function mkListOfAll(){
+  crud.getListOfAll( crud, "#actionDiv");
+}
+function mkAddForm(){
+    $("#actionDiv").html( crud.getFormAdd() );
+    $("#actionDiv").enhanceWithin();
+}
+function mkEdit(){
+  dbQuery( 'select id from ctest1 order by entryDate desc limit 1;',function(res){
+    //console.log("id:",res);
+    id = res[0][ Object.getOwnPropertyNames(res[0])[0] ];
+    crud.getFormEdit(crud, id, "#actionDiv");
+  });
+}
+function mkEditById( id ){
+  crud.getFormEdit(crud, id, "#actionDiv");
+}
+function mkDeleteById( id ){
+  crud.getFormDelete(crud, id, "#actionDiv");
+}
+function mkClean(){
+    $("#actionDiv").html('--');
+}
+function onActionSubmit( action ){
+    cl("on submit "+action);
+    if( action == 'add'){
+      crud.submitAdd(function(){
+        // mkClean();
+        cl("submit add DONE");
+      });
+    }else if( action == "edit" ){
+      crud.submitEdit(function(){
+        cl("submit edit DONE");
+      });
+    }else if( action == "delete" ){
+      crud.submitDelete(function(){
+        cl("submit delete DONE");
+      });
+    }
+}
+</script>
+<script type="module">
+
+
+    import { crudlib } from "./crudlib/crudlib.mjs";
+
+    import { ctest1 } from "./crudsets/ctest1.mjs";
+
+
+    cl("hello crud test ! :)");
+
+    $(document).ready(function(){
+        crud = new crudlib( ctest1 );
+        //mkAddForm();
+        mkListOfAll();
+
+        /*
+        var q = {
+            "res":'select * from resources;',
+            };
+        dbQuery(q, function( data ){
+          console.log("got data...");
+          console.log(data);
+        });
+        console.log('-----------');
+        console.log(crud.dbGetCreate());
+        */
+    });
+
+</script>
+
+</head>
+
+<body>
+<!-- http://www-db.deis.unibo.it/courses/TW/DOCS/w3schools/jquerymobile/jquerymobile_examples.asp.html#gsc.tab=0 -->
+<div data-role="page" data-cache="false">
+  <div data-role="header">
+    <h1>Welcome To My crud lib</h1>
+  </div>
+
+  <div data-role="main" class="ui-content">
+    <div data-role="controlgroup" data-type="horizontal">
+      <a href="#" onclick="mkAddForm();" class="ui-btn ui-mini">Add</a>
+      <a href="#" onclick="mkEdit();" class="ui-btn ui-mini">Edit</a>
+      <a href="#" onclick="" class="ui-btn ui-mini">Delete</a>
+      <a href="#" onclick="mkClean();" class="ui-btn ui-mini">Clean</a>
+      <a href="#" onclick="$('#actionDiv').html('<pre>'+crud.dbGetCreate()+'</pre>');" class="ui-btn ui-mini">create db</a>
+
+    </div>
+  </div>
+<hr>
+<div  id="actionDiv">action div</div>
+</div>
+
+</body>
+</html>
