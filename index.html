@@ -44,14 +44,17 @@ function onActionSubmit( action ){
       crud.submitAdd(function(){
         // mkClean();
         cl("submit add DONE");
+        mkListOfAll();
       });
     }else if( action == "edit" ){
       crud.submitEdit(function(){
         cl("submit edit DONE");
+        mkListOfAll();
       });
     }else if( action == "delete" ){
       crud.submitDelete(function(){
         cl("submit delete DONE");
+        mkListOfAll();
       });
     }
 }

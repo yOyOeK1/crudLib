@@ -51,6 +51,7 @@ class crudlib {
         let tr = '';
         let ids = [];
 
+
         dbQuery( `select * from ${crudObj.crudset.dbtable};`,function(res){
             console.log("res of all:",res);
             //id = res[0][ Object.getOwnPropertyNames(res[0])[0] ];
@@ -81,7 +82,7 @@ class crudlib {
                     let field = fields[f];
                     
                     if( f == 0 ){
-                        let lId = `crudActionCell${res[r].id}`;
+                        let lId = `${crudObj.prefix}crudActionCell${res[r].id}`;
                         ids.push( res[r].id );
                         
                         tr+= `
@@ -109,11 +110,12 @@ class crudlib {
 
 
             $(targetDiv).html(`
-            <table border="1" width="100%">${tr}</table>`);
+            <table border="1" width="100%">${tr}</table>
+            `);
 
 
             for( let r=0,rc=ids.length;r<rc;r++){
-                let lId = `crudActionCell${ids[r]}`;
+                let lId = `${crudObj.prefix}crudActionCell${ids[r]}`;
                 $(`#${lId}e`).click(function(){
                     crudObj.clickTest( 'edit', ids[r] );
                     mkEditById( ids[r ] ); // TODO this is not using local action 
@@ -131,46 +133,14 @@ class crudlib {
         cl("clickTest !"+` action:${action} id:${id}`);
     }
 
-    getFormEdit( crudObj, id, targetDiv ){
-        
-        dbQuery( `select * from ${this.crudset.dbtable} where id=${id};`, function( res ){
-            //cl('form edit got record');
-            //cl(res);
-            res = res[0];
-            let tr = `<input type="hidden" name="id" value="${res.id}">
-                <input type="hidden" name="entryDate" value="${res.entryDate}">`;
-            let fields = crudObj.crudset.fields;
-
-            for(let f=0,fc=fields.length; f<fc; f++){
-                let ff = fields[f];
-                //cl(`fieldNo:${f} type:${ff.type} name:${ff.name}`);
-            
-                if( ff.helper ){
-                    tr+=ff.helper.getAddField( 'edit', res[ff.name] );
-                }else if( ff.type == 'html' ){
-                    tr+= '<div>'+ff.value+'</div>';
-                }
-            }
-            $(targetDiv).html( crudObj.wrapForm( tr, 'edit', 
-                crudObj.crudset.formTitleEdit||"Edit form", 
-                crudObj.getBtsEdit() 
-            ));
-            $(targetDiv).enhanceWithin();
-            
-        });
-    }
-
-    getBtsEdit(){
-        return `
-        <input type="reset" data-inline="true" value="Reset">
-        <input type="submit" data-inline="true" value="Save">
-        `;
-    }
-
     
 
+    getFormEdit( crudObj, id, targetDiv ){
+        this.getFormEditDelete( 'edit', crudObj, id, targetDiv );
+    }
+    
     submitEdit( next ){
-        let ser = $('#crudForm').serializeArray();
+        let ser = $(`#${this.prefix}crudForm`).serializeArray();
         //cl(ser);
         let ti = [];
         let id2Update = this.extractField( ser, 'id' );
@@ -181,7 +151,7 @@ class crudlib {
             if( ff.helper ){
                 ti.push( fname+"=\""+(ff.helper.getValue( ser, fname ))+"\"" );
             }
-
+            
             
         }
         let nvals = ti.join(", ");
@@ -189,9 +159,22 @@ class crudlib {
         let q = `UPDATE ${this.crudset.dbtable} SET ${nvals} WHERE id=${id2Update}`;
         dbQuery( q, next );
     }
-
-
+    
+   
+    
     getFormDelete( crudObj, id, targetDiv ){
+        this.getFormEditDelete( 'delete', crudObj, id, targetDiv );
+    }
+    
+    submitDelete( next ){
+        let ser = $(`#${this.prefix}crudForm`).serializeArray();
+        let id2Update = this.extractField( ser, 'id' );
+        let q = `DELETE FROM ${this.crudset.dbtable} WHERE id=${id2Update}`;
+        dbQuery( q, next );
+    }
+    
+
+     getFormEditDelete( action, crudObj, id, targetDiv ){
         
         dbQuery( `select * from ${this.crudset.dbtable} where id=${id};`, function( res ){
             //cl('form delete got record');
@@ -200,7 +183,7 @@ class crudlib {
             let tr = `<input type="hidden" name="id" value="${res.id}">
                 <input type="hidden" name="entryDate" value="${res.entryDate}">`;
             let fields = crudObj.crudset.fields;
-
+                
             for(let f=0,fc=fields.length; f<fc; f++){
                 let ff = fields[f];
                 //cl(`fieldNo:${f} type:${ff.type} name:${ff.name}`);
@@ -211,31 +194,28 @@ class crudlib {
                     tr+= '<div>'+ff.value+'</div>';
                 }
             }
-            $(targetDiv).html( crudObj.wrapForm( tr, 'delete', 
-                crudObj.crudset.formTitleEdit||"Remove form", 
-                crudObj.getBtsDelete() 
+            
+            let formTitle = '';
+            let formBtns = '';
+            if( action == 'edit' ){
+                formTitle = crudObj.crudset.formTitleEdit||"Edit form";
+                formBtns = crudObj.getBtsEdit();
+            }else if( action == 'delete' ){
+                formTitle = crudObj.crudset.formTitleDelete||"Remove form";
+                formBtns = crudObj.getBtsDelete();
+            }
+
+            $(targetDiv).html( crudObj.wrapForm( tr, action, 
+                formTitle, formBtns
             ));
             $(targetDiv).enhanceWithin();
             
         });
     }
 
-    getBtsDelete(){
-        return `
-        <input type="reset" data-inline="true" value="Reset">
-        <input type="submit" data-inline="true" value="Delete">
-        `;
-    }
 
-    submitDelete( next ){
-        let ser = $('#crudForm').serializeArray();
-        let id2Update = this.extractField( ser, 'id' );
-        let q = `DELETE FROM ${this.crudset.dbtable} WHERE id=${id2Update}`;
-        dbQuery( q, next );
-    }
-
-
-
+    
+    
     getFormAdd(){
         let tr = '';
         for(let f=0,fc=this.crudset.fields.length; f<fc; f++){
@@ -253,15 +233,9 @@ class crudlib {
         );
     }
 
-    getBtsAdd(){
-        return `
-        <input type="reset" data-inline="true" value="Clear">
-        <input type="submit" data-inline="true" value="Add">
-        `;
-    }
-
+    
     submitAdd( next ){
-        let ser = $('#crudForm').serializeArray();
+        let ser = $(`#${this.prefix}crudForm`).serializeArray();
         let ti = [{}];
         
         for(let f=0,fc=this.crudset.fields.length; f<fc; f++){
@@ -289,14 +263,14 @@ class crudlib {
         ti[0].entryDate = dbGetTimestamp();
         
         cl("submit Add values"); cl( ti );
-        dbInsert( this.crudset.dbtable, ti,console.log );
+        dbInsert( this.crudset.dbtable, ti, console.log );
         next();
     }
-
+    
     wrapForm( content, action = "", title = '', bts = '' ){
-        if( title != '' ) title = `<b>${title}</b><br>`;
+        title = ( title != '') ? `<b>${title}</b><br>` : '';
         return `
-        <form id="crudForm" onsubmit="onActionSubmit('${action}');">
+        <form id="${this.prefix}crudForm" onsubmit="onActionSubmit('${action}');">
         
       <input type="hidden" name="crudAction" value="${action}">
       <div class="ui-field-contain">
@@ -305,6 +279,27 @@ class crudlib {
       </div>
       ${bts}
       </form>`;
+    }
+
+    
+    getBtsAdd(){
+        return this.getBts('add');
+    }
+    getBtsEdit(){
+        return this.getBts('edit');
+    }
+    getBtsDelete(){
+        return this.getBts('delete');
+    }
+    getBts( action ){
+        let actionStr = 'add';
+        if( action == 'add' ) actionStr = 'Add';
+        else if( action == 'edit' ) actionStr = 'Save';
+        else if( action == 'delete' ) actionStr = 'Delete';
+        return `
+        <input type="reset" data-inline="true" value="Reset">
+        <input type="submit" data-inline="true" value="${actionStr}">
+        `;
     }
 
     extractField( arr, fname ){
