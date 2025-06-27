@@ -19,8 +19,7 @@ function mkListOfAll(){
   crud.getListOfAll( crud, "#actionDiv");
 }
 function mkAddForm(){
-    $("#actionDiv").html( crud.getFormAdd() );
-    $("#actionDiv").enhanceWithin();
+    crud.getFormAdd( crud, "#actionDiv" );    
 }
 function mkEdit(){
   dbQuery( 'select id from ctest1 order by entryDate desc limit 1;',function(res){

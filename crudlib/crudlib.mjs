@@ -208,6 +208,9 @@ class crudlib {
             $(targetDiv).html( crudObj.wrapForm( tr, action, 
                 formTitle, formBtns
             ));
+            $(`#${crudObj.prefix}crudFormSumbitBtn`).click(function(){
+                onActionSubmit(action);
+            });
             $(targetDiv).enhanceWithin();
             
         });
@@ -216,7 +219,7 @@ class crudlib {
 
     
     
-    getFormAdd(){
+    getFormAdd( crudObj, targetDiv ){
         let tr = '';
         for(let f=0,fc=this.crudset.fields.length; f<fc; f++){
             let ff = this.crudset.fields[f];
@@ -227,10 +230,17 @@ class crudlib {
                 tr+= '<fieldset data-role="controlgroup">'+ff.value+'</fieldset>';
             }
         }
-        return this.wrapForm( tr, 'add', 
+        
+        let ta = this.wrapForm( tr, 'add', 
             this.crudset.formTitleAdd||"Add form", 
-            this.getBtsAdd() 
+            this.getBtsAdd()
         );
+        $(targetDiv).html( ta );
+        $(`#${crudObj.prefix}crudFormSumbitBtn`).click(function(){
+            onActionSubmit('add');
+        });            
+        $(targetDiv).enhanceWithin();
+
     }
 
     
@@ -269,8 +279,9 @@ class crudlib {
     
     wrapForm( content, action = "", title = '', bts = '' ){
         title = ( title != '') ? `<b>${title}</b><br>` : '';
+        //onsubmit="onActionSubmit('${action}');"
         return `
-        <form id="${this.prefix}crudForm" onsubmit="onActionSubmit('${action}');">
+        <form id="${this.prefix}crudForm">
         
       <input type="hidden" name="crudAction" value="${action}">
       <div class="ui-field-contain">
@@ -293,12 +304,14 @@ class crudlib {
     }
     getBts( action ){
         let actionStr = 'add';
+
         if( action == 'add' ) actionStr = 'Add';
         else if( action == 'edit' ) actionStr = 'Save';
         else if( action == 'delete' ) actionStr = 'Delete';
+
         return `
         <input type="reset" data-inline="true" value="Reset">
-        <input type="submit" data-inline="true" value="${actionStr}">
+        <input type="button" id="${this.prefix}crudFormSumbitBtn" data-inline="true" value="${actionStr}">
         `;
     }
 

@@ -6,7 +6,11 @@ My crucked aproche to add edit delete view data using javascrit and mysql servic
 
 This set of javascript is making CRUD operation on data.
 Data is comming from API build in node-red to present http interface returning data from mysql.
-Then stuff is process on client site. This need to run at http not file:// rules of import export javascript modules style of coding.
+Then stuff is process on client site. This need to run at http not file:// rules of import export javascript modules style of coding. There is complitly no security. You can hack it in many points. The concept is to have intranet / home base CRUD library.
+
+# status of project
+
+In early stage. Working but eeee ....
 
 # types of supported fields
 
