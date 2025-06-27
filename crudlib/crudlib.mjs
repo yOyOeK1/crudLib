@@ -53,7 +53,7 @@ class crudlib {
 
 
         dbQuery( `select * from ${crudObj.crudset.dbtable};`,function(res){
-            console.log("res of all:",res);
+            //console.log("res of all:",res);
             //id = res[0][ Object.getOwnPropertyNames(res[0])[0] ];
             //crud.getFormEdit(crud, id, "#actionDiv");
             
@@ -117,11 +117,11 @@ class crudlib {
             for( let r=0,rc=ids.length;r<rc;r++){
                 let lId = `${crudObj.prefix}crudActionCell${ids[r]}`;
                 $(`#${lId}e`).click(function(){
-                    crudObj.clickTest( 'edit', ids[r] );
+                    //crudObj.clickTest( 'edit', ids[r] );
                     mkEditById( ids[r ] ); // TODO this is not using local action 
                 });
                 $(`#${lId}d`).click(function(){
-                    crudObj.clickTest( 'del', ids[r] );
+                    //crudObj.clickTest( 'del', ids[r] );
                     mkDeleteById( ids[r] ); // TODO this is not using local reference
                 });
             }
@@ -135,8 +135,8 @@ class crudlib {
 
     
 
-    getFormEdit( crudObj, id, targetDiv ){
-        this.getFormEditDelete( 'edit', crudObj, id, targetDiv );
+    getFormEdit( crudObj, id, targetDiv, next ){
+        this.getFormEditDelete( 'edit', crudObj, id, targetDiv, next );
     }
     
     submitEdit( next ){
@@ -162,8 +162,8 @@ class crudlib {
     
    
     
-    getFormDelete( crudObj, id, targetDiv ){
-        this.getFormEditDelete( 'delete', crudObj, id, targetDiv );
+    getFormDelete( crudObj, id, targetDiv, next ){
+        this.getFormEditDelete( 'delete', crudObj, id, targetDiv, next );
     }
     
     submitDelete( next ){
@@ -174,7 +174,8 @@ class crudlib {
     }
     
 
-     getFormEditDelete( action, crudObj, id, targetDiv ){
+    getFormEditDelete( action, crudObj, id, targetDiv, next ){
+        $(targetDiv).html(`getting data ...`);
         
         dbQuery( `select * from ${this.crudset.dbtable} where id=${id};`, function( res ){
             //cl('form delete got record');
@@ -209,7 +210,11 @@ class crudlib {
                 formTitle, formBtns
             ));
             $(`#${crudObj.prefix}crudFormSumbitBtn`).click(function(){
-                onActionSubmit(action);
+                //onActionSubmit(action);
+                if( action == 'edit' )
+                    crudObj.submitEdit( next );
+                else if( action == 'delete' )
+                    crudObj.submitDelete( next );
             });
             $(targetDiv).enhanceWithin();
             
@@ -219,7 +224,7 @@ class crudlib {
 
     
     
-    getFormAdd( crudObj, targetDiv ){
+    getFormAdd( crudObj, targetDiv, next ){
         let tr = '';
         for(let f=0,fc=this.crudset.fields.length; f<fc; f++){
             let ff = this.crudset.fields[f];
@@ -237,7 +242,8 @@ class crudlib {
         );
         $(targetDiv).html( ta );
         $(`#${crudObj.prefix}crudFormSumbitBtn`).click(function(){
-            onActionSubmit('add');
+            //onActionSubmit('add');
+            crudObj.submitAdd( next );
         });            
         $(targetDiv).enhanceWithin();
 
@@ -258,7 +264,7 @@ class crudlib {
                     ti[0][fname] = fdata;
                 }
             }
-            cl(`fieldNo:${f} type:${ff.type} name:${ff.name} => ${fdata}`);
+            //cl(`fieldNo:${f} type:${ff.type} name:${ff.name} => ${fdata}`);
             if( ff.validate && fdata != undefined ){
                 let valRes = ff.validate[0]( fdata, ff.validate[1] );
                 cl('val res '+valRes.result+" val err:"+valRes.errMsg);

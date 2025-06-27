@@ -7,13 +7,17 @@ if (!String.prototype.hasOwnProperty('addSlashes')) {
 function dbGetTimestamp(){
   return Math.floor(Date.now() / 1000);
 }
+function dbAddZeroIf( v ){
+  return ( v < 10 ) ? '0'+v : v; 
+}
 function dbGetCompactTimeFromTimestamp( timestamp ){
   var date = new Date(timestamp * 1000);
   return date.getFullYear()+
           "/"+(date.getMonth()+1)+
           "/"+date.getDate()+
-          " "+date.getHours()+
-          ":"+date.getMinutes();
+          " "+dbAddZeroIf( date.getHours() )+
+          ":"+dbAddZeroIf( date.getMinutes() )+
+          ':'+dbAddZeroIf( date.getSeconds() );
 }
 
 
