@@ -23,6 +23,8 @@ class crudlib {
             }
         }
 
+        this.pageHaveRec = 6;
+        
     }
 
     dbGetCreate(){
@@ -46,13 +48,92 @@ class crudlib {
 
 
 
-    getListOfAll( crudObj, targetDiv ){
-        $(targetDiv).html(`getting data ...`);
+    getList( crudObj, targetDiv, pageCurrent=0 ){
+        crudObj.pageCurrent = pageCurrent;
+        let targetDivName = String(targetDiv).repeat('#','');
+        let tr = `
+            <div id="${targetDivName}table">table</div>
+            <div id="${targetDivName}paging">paging</div>
+            `;
+        $(targetDiv).html( tr );
+
+        crudObj.getListOfAll( crudObj, `#${targetDivName}table`, pageCurrent );
+        crudObj.getPagingOfAll( crudObj, `#${targetDivName}paging`, `#${targetDivName}table`);
+    }
+    
+
+    onPagging( crudObj, newPage, listOfAllDiv, targetName ){
+        cl("on pagging new page"+newPage);
+        if( newPage < 0) newPage = 0;
+        crudObj.pageCurrent = newPage;
+        crudObj.getListOfAll( crudObj, listOfAllDiv, newPage);
+        $(`#${targetName}now`).html( (newPage+1) );
+        
+        if( newPage == 0 ){
+            $(`#${targetName}p0`).prop('disabled', true);
+            $(`#${targetName}m1`).prop('disabled', true);
+        }else{
+            $(`#${targetName}p0`).prop('disabled', false);
+            $(`#${targetName}m1`).prop('disabled', false);            
+        }
+
+        if( newPage < (crudObj.pageRecTotal-1) ){
+            $(`#${targetName}p1`).prop('disabled', false);
+            $(`#${targetName}m`).prop('disabled', false);
+        }else{
+            $(`#${targetName}p1`).prop('disabled', true);
+            $(`#${targetName}m`).prop('disabled', true);
+        }
+
+    }
+   
+
+    getPagingOfAll( crudObj, targetDiv, listOfAllDiv ){
+        let targetName = String(targetDiv).repeat('#','');
+        let q = `select count(id) as total from ${crudObj.crudset.dbtable};`;      
+        
+        dbQuery( q,function(res){
+            let len = res[0].total;
+            let ptotal = Math.ceil(len/crudObj.pageHaveRec);
+            crudObj.pageRecTotal = ptotal;
+            cl(`paging have: ${len} elements ${crudObj.pageHaveRec} on page`);
+            let disStr = 'disabled';
+            let tr = `
+            <input type="button" id="${targetName}p0" value="|<" />
+            <input type="button" id="${targetName}m1" value="<" />
+            <b id="${targetName}now">${crudObj.pageCurrent+1}</b><b>/${ptotal}</b>
+            <input type="button" id="${targetName}p1" value=">" />
+            <input type="button" id="${targetName}m" value=">|" />
+            `;
+            
+            $(targetDiv).html( tr );
+
+            $(`#${targetName}p0`).click(function(){
+                crudObj.onPagging( crudObj, 0, listOfAllDiv, targetName );
+            });
+            $(`#${targetName}m1`).click(function(){
+                crudObj.onPagging( crudObj, crudObj.pageCurrent-1, listOfAllDiv, targetName );
+            });
+            $(`#${targetName}p1`).click(function(){
+                crudObj.onPagging( crudObj, crudObj.pageCurrent+1, listOfAllDiv, targetName );
+            });
+            $(`#${targetName}m`).click(function(){
+                crudObj.onPagging( crudObj, ptotal-1, listOfAllDiv, targetName );
+            });
+
+            crudObj.onPagging( crudObj, crudObj.pageCurrent, listOfAllDiv, targetName );
+            
+        });
+    }
+
+
+    getListOfAll( crudObj, targetDiv, pageCurrent=0 ){
+        //$(targetDiv).html(`getting data ...`);
         let tr = '';
-        let ids = [];
+        let ids = [];  
+        let q = `select * from ${crudObj.crudset.dbtable} limit ${pageCurrent*crudObj.pageHaveRec},${crudObj.pageHaveRec};`;      
 
-
-        dbQuery( `select * from ${crudObj.crudset.dbtable};`,function(res){
+        dbQuery( q,function(res){
             //console.log("res of all:",res);
             //id = res[0][ Object.getOwnPropertyNames(res[0])[0] ];
             //crud.getFormEdit(crud, id, "#actionDiv");
