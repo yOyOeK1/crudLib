@@ -10,6 +10,7 @@ class crudlib {
     constructor( crudset ){
         this.prefix = 'abc';
         this.crudset = crudset;
+        this.debClFunctions = true;
 
         cl(`crudlib->constructor... prefix:[${this.prefix}]`);cl(crudset);
 
@@ -28,6 +29,7 @@ class crudlib {
     }
 
     dbGetCreate(){
+        this.debClFunctions ? cl('crud.dbGetCreate()'):'';
         let fieldsa = [];
         for(let f=0,fc=this.crudset.fields.length; f<fc; f++){
             if( this.crudset.fields[f].helper ){
@@ -47,24 +49,29 @@ class crudlib {
     }
 
 
-
+    /* To get full set of list with pagging option
+    */
     getList( crudObj, targetDiv, pageCurrent=0 ){
+        crudObj.debClFunctions ? cl('crud.getList()'):'';
         crudObj.pageCurrent = pageCurrent;
-        let targetDivName = String(targetDiv).repeat('#','');
+        let targetDivName = String(targetDiv).substring(1);
         let tr = `
             <div id="${targetDivName}table">table</div>
             <div id="${targetDivName}paging">paging</div>
             `;
         $(targetDiv).html( tr );
 
-        crudObj.getListOfAll( crudObj, `#${targetDivName}table`, pageCurrent );
+        //crudObj.getListOfAll( crudObj, `#${targetDivName}table`, pageCurrent );
         crudObj.getPagingOfAll( crudObj, `#${targetDivName}paging`, `#${targetDivName}table`);
     }
     
 
     onPagging( crudObj, newPage, listOfAllDiv, targetName ){
+        crudObj.debClFunctions ? cl('crud.onPagging()'):'';
         cl("on pagging new page"+newPage);
+
         if( newPage < 0) newPage = 0;
+
         crudObj.pageCurrent = newPage;
         crudObj.getListOfAll( crudObj, listOfAllDiv, newPage);
         $(`#${targetName}now`).html( (newPage+1) );
@@ -89,7 +96,8 @@ class crudlib {
    
 
     getPagingOfAll( crudObj, targetDiv, listOfAllDiv ){
-        let targetName = String(targetDiv).repeat('#','');
+        crudObj.debClFunctions ? cl('crud.getPagingOfAll()'):'';
+        let targetName = String(targetDiv).substring(1);
         let q = `select count(id) as total from ${crudObj.crudset.dbtable};`;      
         
         dbQuery( q,function(res){
@@ -128,6 +136,7 @@ class crudlib {
 
 
     getListOfAll( crudObj, targetDiv, pageCurrent=0 ){
+        crudObj.debClFunctions ? cl('crud.getListOfAll()'):'';
         //$(targetDiv).html(`getting data ...`);
         let tr = '';
         let ids = [];  
@@ -217,10 +226,12 @@ class crudlib {
     
 
     getFormEdit( crudObj, id, targetDiv, next ){
+        crudObj.debClFunctions ? cl('crud.getFormEdit()'):'';
         this.getFormEditDelete( 'edit', crudObj, id, targetDiv, next );
     }
     
     submitEdit( next ){
+        this.debClFunctions ? cl('crud.submitEdit()'):'';
         let ser = $(`#${this.prefix}crudForm`).serializeArray();
         //cl(ser);
         let ti = [];
@@ -244,10 +255,12 @@ class crudlib {
    
     
     getFormDelete( crudObj, id, targetDiv, next ){
+        crudObj.debClFunctions ? cl('crud.getFormDelete()'):'';
         this.getFormEditDelete( 'delete', crudObj, id, targetDiv, next );
     }
     
     submitDelete( next ){
+        this.debClFunctions ? cl('crud.submitDelete()'):'';
         let ser = $(`#${this.prefix}crudForm`).serializeArray();
         let id2Update = this.extractField( ser, 'id' );
         let q = `DELETE FROM ${this.crudset.dbtable} WHERE id=${id2Update}`;
@@ -256,6 +269,7 @@ class crudlib {
     
 
     getFormEditDelete( action, crudObj, id, targetDiv, next ){
+        crudObj.debClFunctions ? cl('crud.getFormEditDelete()'):'';
         $(targetDiv).html(`getting data ...`);
         
         dbQuery( `select * from ${this.crudset.dbtable} where id=${id};`, function( res ){
@@ -306,6 +320,7 @@ class crudlib {
     
     
     getFormAdd( crudObj, targetDiv, next ){
+        crudObj.debClFunctions ? cl('crud.getFormAdd()'):'';
         let tr = '';
         for(let f=0,fc=this.crudset.fields.length; f<fc; f++){
             let ff = this.crudset.fields[f];
@@ -332,6 +347,7 @@ class crudlib {
 
     
     submitAdd( next ){
+        this.debClFunctions ? cl('crud.submitAdd()'):'';
         let ser = $(`#${this.prefix}crudForm`).serializeArray();
         let ti = [{}];
         
@@ -365,6 +381,7 @@ class crudlib {
     }
     
     wrapForm( content, action = "", title = '', bts = '' ){
+        this.debClFunctions ? cl('crud.wropForm()'):'';
         title = ( title != '') ? `<b>${title}</b><br>` : '';
         //onsubmit="onActionSubmit('${action}');"
         return `
