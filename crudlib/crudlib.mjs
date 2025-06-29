@@ -54,7 +54,7 @@ class crudlib {
     getList( crudObj, targetDiv, pageCurrent=0 ){
         crudObj.debClFunctions ? cl('crud.getList()'):'';
         crudObj.pageCurrent = pageCurrent;
-        let targetDivName = String(targetDiv).substring(1);
+        let targetDivName = crudObj.prefix+String(targetDiv).substring(1);
         let tr = `
             <div id="${targetDivName}table">table</div>
             <div id="${targetDivName}paging">paging</div>
@@ -223,94 +223,85 @@ class crudlib {
     }
 
     
+    
+    getFormAdd( crudObj, targetDiv, next ){
+        crudObj.debClFunctions ? cl('crud.getFormAdd()'):'';
+        this.getFormEditDelete( 'add', crudObj, 0, targetDiv, next );
+    }
 
     getFormEdit( crudObj, id, targetDiv, next ){
         crudObj.debClFunctions ? cl('crud.getFormEdit()'):'';
         this.getFormEditDelete( 'edit', crudObj, id, targetDiv, next );
     }
     
-    submitEdit( next ){
-        this.debClFunctions ? cl('crud.submitEdit()'):'';
-        let ser = $(`#${this.prefix}crudForm`).serializeArray();
-        //cl(ser);
-        let ti = [];
-        let id2Update = this.extractField( ser, 'id' );
-        
-        for(let f=0,fc=this.crudset.fields.length; f<fc; f++){
-            let ff = this.crudset.fields[f];
-            let fname = ff.name;
-            if( ff.helper ){
-                ti.push( fname+"=\""+(ff.helper.getValue( ser, fname ))+"\"" );
-            }
-            
-            
-        }
-        let nvals = ti.join(", ");
-        //cl(nvals);
-        let q = `UPDATE ${this.crudset.dbtable} SET ${nvals} WHERE id=${id2Update}`;
-        dbQuery( q, next );
-    }
-    
-   
-    
     getFormDelete( crudObj, id, targetDiv, next ){
         crudObj.debClFunctions ? cl('crud.getFormDelete()'):'';
         this.getFormEditDelete( 'delete', crudObj, id, targetDiv, next );
     }
     
-    submitDelete( next ){
-        this.debClFunctions ? cl('crud.submitDelete()'):'';
-        let ser = $(`#${this.prefix}crudForm`).serializeArray();
-        let id2Update = this.extractField( ser, 'id' );
-        let q = `DELETE FROM ${this.crudset.dbtable} WHERE id=${id2Update}`;
-        dbQuery( q, next );
+
+    getFormEditDelete_sub( action, crudObj, id, targetDiv, next, res ){
+        let tr = `<input type="hidden" name="id" value="${res.id}">
+            <input type="hidden" name="entryDate" value="${res.entryDate}">`;
+        let fields = crudObj.crudset.fields;
+            
+        for(let f=0,fc=fields.length; f<fc; f++){
+            let ff = fields[f];
+            
+            if( ff.helper ){
+                if( action == 'add' )
+                    tr+=ff.helper.getAddField( 'add' );
+                else
+                    tr+=ff.helper.getAddField( 'edit', res[ff.name] );
+
+            }else if( ff.type == 'html' ){
+                //tr+= '<div>'+ff.value+'</div>';
+                tr+= '<fieldset data-role="controlgroup">'+ff.value+'</fieldset>';
+            }
+        }
+        
+        let formTitle = '';
+        let formBtns = '';
+        if( action == 'add' ){
+            formTitle = crudObj.crudset.formTitleAdd||"Add form";
+            formBtns = crudObj.getBtsAdd();
+        }else if( action == 'edit' ){
+            formTitle = crudObj.crudset.formTitleEdit||"Edit form";
+            formBtns = crudObj.getBtsEdit();
+        }else if( action == 'delete' ){
+            formTitle = crudObj.crudset.formTitleDelete||"Remove form";
+            formBtns = crudObj.getBtsDelete();
+        }
+
+        $(targetDiv).html( crudObj.wrapForm( tr, action, 
+            formTitle, formBtns
+        ));
+        $(`#${crudObj.prefix}crudFormSumbitBtn`).click(function(){
+            //onActionSubmit(action);
+            if( action == 'add' )
+                crudObj.submitAED( 'add', next );
+            else if( action == 'edit' )
+                crudObj.submitAED( 'edit', next );
+            else if( action == 'delete' )
+                crudObj.submitAED( 'delete', next );
+        });
+        $(targetDiv).enhanceWithin();
+        
     }
-    
 
     getFormEditDelete( action, crudObj, id, targetDiv, next ){
-        crudObj.debClFunctions ? cl('crud.getFormEditDelete()'):'';
+        crudObj.debClFunctions ? cl(`crud.getFormEditDelete( action:${action} )`):'';
         $(targetDiv).html(`getting data ...`);
+        if( action == 'add' ){
+            crudObj.getFormEditDelete_sub( action, crudObj, id, targetDiv, next, 0);
+            return 0;
+        }
         
         dbQuery( `select * from ${this.crudset.dbtable} where id=${id};`, function( res ){
             //cl('form delete got record');
             //cl(res);
             res = res[0];
-            let tr = `<input type="hidden" name="id" value="${res.id}">
-                <input type="hidden" name="entryDate" value="${res.entryDate}">`;
-            let fields = crudObj.crudset.fields;
-                
-            for(let f=0,fc=fields.length; f<fc; f++){
-                let ff = fields[f];
-                //cl(`fieldNo:${f} type:${ff.type} name:${ff.name}`);
-            
-                if( ff.helper ){
-                    tr+=ff.helper.getAddField( 'edit', res[ff.name] );
-                }else if( ff.type == 'html' ){
-                    tr+= '<div>'+ff.value+'</div>';
-                }
-            }
-            
-            let formTitle = '';
-            let formBtns = '';
-            if( action == 'edit' ){
-                formTitle = crudObj.crudset.formTitleEdit||"Edit form";
-                formBtns = crudObj.getBtsEdit();
-            }else if( action == 'delete' ){
-                formTitle = crudObj.crudset.formTitleDelete||"Remove form";
-                formBtns = crudObj.getBtsDelete();
-            }
-
-            $(targetDiv).html( crudObj.wrapForm( tr, action, 
-                formTitle, formBtns
-            ));
-            $(`#${crudObj.prefix}crudFormSumbitBtn`).click(function(){
-                //onActionSubmit(action);
-                if( action == 'edit' )
-                    crudObj.submitEdit( next );
-                else if( action == 'delete' )
-                    crudObj.submitDelete( next );
-            });
-            $(targetDiv).enhanceWithin();
+            crudObj.getFormEditDelete_sub( action, crudObj, id, targetDiv, next, res);
             
         });
     }
@@ -318,65 +309,72 @@ class crudlib {
 
     
     
-    getFormAdd( crudObj, targetDiv, next ){
-        crudObj.debClFunctions ? cl('crud.getFormAdd()'):'';
-        let tr = '';
-        for(let f=0,fc=this.crudset.fields.length; f<fc; f++){
-            let ff = this.crudset.fields[f];
-            //cl(`fieldNo:${f} type:${ff.type} name:${ff.name}`);
-            if( ff.helper ){
-                tr+= ff.helper.getAddField( 'add' );
-            } else if( ff.type == 'html' ){
-                tr+= '<fieldset data-role="controlgroup">'+ff.value+'</fieldset>';
-            }
-        }
-        
-        let ta = this.wrapForm( tr, 'add', 
-            this.crudset.formTitleAdd||"Add form", 
-            this.getBtsAdd()
-        );
-        $(targetDiv).html( ta );
-        $(`#${crudObj.prefix}crudFormSumbitBtn`).click(function(){
-            //onActionSubmit('add');
-            crudObj.submitAdd( next );
-        });            
-        $(targetDiv).enhanceWithin();
-
-    }
+    
 
     
-    submitAdd( next ){
-        this.debClFunctions ? cl('crud.submitAdd()'):'';
+    submitAED( action, next ){
+        this.debClFunctions ? cl(`crud.submitAED( action:${action} )`):'';
         let ser = $(`#${this.prefix}crudForm`).serializeArray();
-        let ti = [{}];
+        let ti = undefined;
+        let id2Update = undefined;
+
+        if( action == 'add' )
+            ti = [{}];
+        else if( action == 'edit' || action == 'delete' ){
+            id2Update = this.extractField( ser, 'id' );
+            ti = [];
+        }
+
+        if( action == 'delete' ){
+            let q = `DELETE FROM ${this.crudset.dbtable} WHERE id=${id2Update}`;
+            dbQuery( q, next );
+            return 0;
+        }
         
         for(let f=0,fc=this.crudset.fields.length; f<fc; f++){
             let ff = this.crudset.fields[f];
             let fname = ff.name;
             let fdata = undefined;
+
             if( ff.helper ){
-                fdata = ff.helper.getValue( ser );
-                if( fdata != undefined ){
-                    ti[0][fname] = fdata;
+                if( action == 'add' ){
+                    fdata = ff.helper.getValue( ser );
+                    if( fdata != undefined ){
+                        ti[0][fname] = fdata;
+                    }
+                }else if( action == 'edit' ){
+                    ti.push( fname+"=\""+(ff.helper.getValue( ser, fname ))+"\"" );
                 }
             }
-            //cl(`fieldNo:${f} type:${ff.type} name:${ff.name} => ${fdata}`);
-            if( ff.validate && fdata != undefined ){
-                let valRes = ff.validate[0]( fdata, ff.validate[1] );
-                cl('val res '+valRes.result+" val err:"+valRes.errMsg);
-                if( valRes.result == false ){
-                    alert( ff.caption+' '+valRes.errMsg);
-                    //$("#myPopup").popup('open');
-                    return 1;
+
+            if( action == 'add' ){
+                //cl(`fieldNo:${f} type:${ff.type} name:${ff.name} => ${fdata}`);
+                if( ff.validate && fdata != undefined ){
+                    let valRes = ff.validate[0]( fdata, ff.validate[1] );
+                    cl('val res '+valRes.result+" val err:"+valRes.errMsg);
+                    if( valRes.result == false ){
+                        alert( ff.caption+' '+valRes.errMsg);
+                        //$("#myPopup").popup('open');
+                        return 1;
+                    }
                 }
             }
             
         }
-        ti[0].entryDate = dbGetTimestamp();
-        
-        cl("submit Add values"); cl( ti );
-        dbInsert( this.crudset.dbtable, ti, console.log );
-        next();
+
+        if( action == 'add' ){
+            ti[0].entryDate = dbGetTimestamp();
+            
+            cl("submit Add values"); cl( ti );
+            dbInsert( this.crudset.dbtable, ti, next );
+
+        }else if( action == 'edit' ){
+            let nvals = ti.join(", ");
+            //cl(nvals);
+            let q = `UPDATE ${this.crudset.dbtable} SET ${nvals} WHERE id=${id2Update}`;
+            dbQuery( q, next );
+
+        }
     }
     
     wrapForm( content, action = "", title = '', bts = '' ){
@@ -384,15 +382,14 @@ class crudlib {
         title = ( title != '') ? `<b>${title}</b><br>` : '';
         //onsubmit="onActionSubmit('${action}');"
         return `
-        <form id="${this.prefix}crudForm">
-        
-      <input type="hidden" name="crudAction" value="${action}">
-      <div class="ui-field-contain">
-        ${title}
-        ${content}
-      </div>
-      ${bts}
-      </form>`;
+        <form id="${this.prefix}crudForm">        
+            <input type="hidden" name="crudAction" value="${action}">
+            <div class="ui-field-contain">
+                ${title}
+                ${content}
+            </div>
+            ${bts}
+        </form>`;
     }
 
     

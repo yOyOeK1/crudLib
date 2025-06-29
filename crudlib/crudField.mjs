@@ -112,12 +112,12 @@ class crudFieldSelect extends crudField{
         }
         selOptions = selOptions.join("\n");
         return `
-        <fieldset class="ui-field-contain">
+        <!--<fieldset class="ui-field-contain">-->
             <label for="${this.name}">${this.optOrg.caption}:</label>
             <select name="${this.name}" id="${this.name}">
                 ${selOptions}
             </select>
-        </fieldset>
+        <!--</fieldset>-->
         `;
     }
 
