@@ -10,7 +10,15 @@
     <script src="libs/apiTokens.js"></script>
     <script src="libs/dbApiHelper.js"></script>
 
+    <style>
+    th {
+        border-bottom: 1px solid #d6d6d6;
+    }
 
+    tr:nth-child(even) {
+        background: #e9e9e9;
+    }
+    </style>
 <script>
 var crud;
 function cl(st){ console.log(st);}
@@ -90,20 +98,24 @@ function mkClean(){
 <div data-role="page" data-cache="false">
   <div data-role="header">
     <h1>Welcome To My crud lib</h1>
-  </div>
-
-  <div data-role="main" class="ui-content">
-    <div data-role="controlgroup" data-type="horizontal">
-      <a href="#" onclick="mkAddForm();" class="ui-btn ui-mini">Add</a>
-      <a href="#" onclick="mkEdit();" class="ui-btn ui-mini">Edit</a>
-      <!--<a href="#" onclick="" class="ui-btn ui-mini">Delete</a>-->
-      <a href="#" onclick="mkClean();" class="ui-btn ui-mini">Clean</a>
-      <a href="#" onclick="$('#actionDiv').html('<pre>'+crud.dbGetCreate()+'</pre>');" class="ui-btn ui-mini">create db</a>
-
+    
+    <div data-role="navbar">
+      <ul>
+        <li><a href="#" onclick="mkAddForm();" class="ui-btn ui-mini">Add</a></li>
+        <li><a href="#" onclick="mkEdit();" class="ui-btn ui-mini">Edit</a></li>
+        <!--<a href="#" onclick="" class="ui-btn ui-mini">Delete</a>-->
+        <li><a href="#" onclick="mkClean();" class="ui-btn ui-mini">Clean</a></li>
+        <li><a href="#" onclick="$('#actionDiv').html('<pre>'+crud.dbGetCreate()+'</pre>');" class="ui-btn ui-mini">create db</a></li>
+      </ul>
     </div>
+    
   </div>
-<hr>
-<div id="actionDiv">action div</div>
+    
+  <div data-role="main" class="ui-content">
+    <div id="actionDiv">action div</div>
+  </div>
+
+
 </div>
 
 </body>

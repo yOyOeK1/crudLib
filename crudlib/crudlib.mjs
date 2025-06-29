@@ -150,24 +150,23 @@ class crudlib {
             for( let r=0,rc=res.length;r<rc; r++){
                 let fields = crudObj.crudset.fields;
 
+                // table header
                 if( r == 0 ){
                     tr+='<tr>';
                     for( let f=0,fc=fields.length; f<fc; f++){
-                        if( f == 0 ){
-                            tr+=`<th>actions</th>`;
-                        }
-                        if( fields[f].helper ){
-                            tr+=`<th>${fields[f].name}</th>`;
-                        }
-                        if( f == fc-1 ){
+                        if( f == 0 )
+                            tr+=`<th>Actions</th>`;                        
+                        if( fields[f].helper )
+                            tr+=`<th>${fields[f].caption}</th>`;                        
+                        if( f == fc-1 )
                             tr+=`<th>Created</th>`;
-                        }
+                        
                     }
                     tr+='</tr>';
                 }
                 
                 tr+= '<tr>';
-                
+                // table data row
                 for( let f=0,fc=fields.length; f<fc; f++){
                     let field = fields[f];
                     
@@ -200,7 +199,7 @@ class crudlib {
 
 
             $(targetDiv).html(`
-            <table border="1" width="100%">${tr}</table>
+            <table border="0" width="100%">${tr}</table>
             `);
 
 
