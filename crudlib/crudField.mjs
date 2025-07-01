@@ -54,6 +54,8 @@ class crudFieldTextInput extends crudField{
 
 }
 
+
+
 class crudFieldCheckbox extends crudField{
 
     constructor( options ){
@@ -132,6 +134,57 @@ class crudFieldSelect extends crudField{
 
 }
 
+class crudFieldFileUpload extends crudField{
+
+    constructor( options ){
+        super( options );
+        //console.log("text input DONE"+this.name);
+    }
+
+    getDBCreateLine(){
+        return `\`${this.name}\` varchar(255) COLLATE utf8_bin NOT NULL`;
+    }
+
+    getAddField( action, value = '' ){
+        console.log("file upload DONE "+this.name+' val: '+value);
+        return `
+        <label for="${this.name}">${this.optOrg.caption}:</label>
+        <input type="file" name="${this.name}" id="${this.name}" value="${value}" valueorg="${value}">
+        `;
+    }
+
+    getValue( data ){
+        if( $('#fupload')[0].files[0] == undefined ){
+            cl('upload no file');
+            return $('#fupload').attr('valueorg');
+        }
+        cl("do upload");
+        let form = new FormData();
+        let formData = new FormData(form[0]);
+        let timestamp = Date.now();
+        let fname = timestamp+"_"+$('#fupload')[0].files[0].name;
+        formData.append('sufix', timestamp);
+        formData.append('file1',$('#fupload')[0].files[0]);
+        $.ajax({
+            url: 'http://192.168.43.1:1880/crud',//'http://192.168.43.1:3000/api/ds/query',
+            type: "POST",
+            data: formData,
+            cache: false,
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                cl(`upload is ok `);cl(data);
+            },
+            error: function (e) {
+                //error
+                cl(`upload is error `);cl(e);
+            }
+        });
+
+        return fname;
+    }
+
+}
 
 
 function extractFieldByValue( arr, fname ){
@@ -154,4 +207,4 @@ function extractField( arr, fname ){
     return undefined;
 }
 
-export { crudField, crudFieldTextInput, crudFieldCheckbox, crudFieldSelect };
+export { crudField, crudFieldTextInput, crudFieldCheckbox, crudFieldSelect, crudFieldFileUpload };

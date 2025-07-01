@@ -24,17 +24,19 @@ Field sets, types, styles, behaviores are in crudlib/crudField.mjs
 
 * crudFieldSelect - select combo box with select one
 
+* html - for raw injections
+
 # things
 
 * action forms custom title and fields
 
 * build in verification of inserted data
 
-* default values
+* default values for forms fields
+
+* list of all have small pagging support
 
 more is comming ...
-
-
 
 ## node-red flow mysql api
 

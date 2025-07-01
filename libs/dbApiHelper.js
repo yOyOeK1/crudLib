@@ -175,6 +175,8 @@ function dbQuery( q, callBack){
     type: 'post',
     url: 'http://192.168.43.1:1880/crud',//'http://192.168.43.1:3000/api/ds/query',
     dataType: 'text',
+    processData: false,
+    contentType: false,
     data: dataToSend,
     headers: {
       'Access-Control-Allow-Origin': '*',

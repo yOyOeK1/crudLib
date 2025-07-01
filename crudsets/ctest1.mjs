@@ -24,6 +24,13 @@ var ctest1 = {
             //validate: [ validate.crudValidateWantNumbers, ]
         },
         {
+            type: "fileupload",
+            name: "fupload",
+            caption: "File",
+            value: "",
+            //validate: [ validate.crudValidateWantNumbers, ]
+        },
+        {
             type: "select",
             name: "selNo",
             caption: "Select transport",

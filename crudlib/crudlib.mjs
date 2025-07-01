@@ -1,5 +1,5 @@
 
-import { crudField, crudFieldCheckbox, crudFieldSelect, crudFieldTextInput  } from "../crudlib/crudField.mjs";
+import { crudField, crudFieldCheckbox, crudFieldFileUpload, crudFieldSelect, crudFieldTextInput  } from "../crudlib/crudField.mjs";
 
 function cl( str ){
     console.log( str );
@@ -21,6 +21,8 @@ class crudlib {
                 this.crudset.fields[f].helper = new crudFieldCheckbox( this.crudset.fields[f] );
             } else if( this.crudset.fields[f].type == 'select' ){
                 this.crudset.fields[f].helper = new crudFieldSelect( this.crudset.fields[f] );
+            } else if( this.crudset.fields[f].type == 'fileupload' ){
+                this.crudset.fields[f].helper = new crudFieldFileUpload( this.crudset.fields[f] );
             }
         }
 
@@ -315,6 +317,8 @@ class crudlib {
     submitAED( action, next ){
         this.debClFunctions ? cl(`crud.submitAED( action:${action} )`):'';
         let ser = $(`#${this.prefix}crudForm`).serializeArray();
+        cl('ser');cl(ser);
+            
         let ti = undefined;
         let id2Update = undefined;
 
@@ -370,7 +374,7 @@ class crudlib {
 
         }else if( action == 'edit' ){
             let nvals = ti.join(", ");
-            //cl(nvals);
+            cl(nvals);
             let q = `UPDATE ${this.crudset.dbtable} SET ${nvals} WHERE id=${id2Update}`;
             dbQuery( q, next );
 
