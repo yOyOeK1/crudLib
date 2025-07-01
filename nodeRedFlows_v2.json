@@ -1,0 +1,244 @@
+[
+    {
+        "id": "3a8d43eff1e723e5",
+        "type": "http in",
+        "z": "30a93a76fd1944f1",
+        "name": "GET curl1",
+        "url": "/crud",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 190,
+        "y": 220,
+        "wires": [
+            [
+                "4c26f58a088323f5",
+                "b62c6f0f14885c7c"
+            ]
+        ]
+    },
+    {
+        "id": "ff6fe80bd61653e9",
+        "type": "http response",
+        "z": "30a93a76fd1944f1",
+        "name": "",
+        "statusCode": "",
+        "headers": {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE"
+        },
+        "x": 970,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "4c26f58a088323f5",
+        "type": "function",
+        "z": "30a93a76fd1944f1",
+        "name": "",
+        "func": "if( msg.req.files && msg.req.files.length > 0 ){\n    let timestamp = Date.now();\n    let nfilename = msg.req.body.sufix+\"_\"+msg.req.files[0].originalname;\n    msg['filename'] = '/data/data/com.termux/files/home/grafanaPub/public/tmp/'+\n        nfilename;\n    msg['encoding'] = 'base64';\n    msg['payload'] = msg.req.files[0].buffer;\n    msg['nfilename'] = nfilename;\n    return [,msg];\n}\n\nmsg.topic = msg.payload.queries[0].rawSql;\n\nreturn [msg,];",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 410,
+        "y": 240,
+        "wires": [
+            [
+                "b6ca1cbaa442d830",
+                "35bd73a48b4eba0d"
+            ],
+            [
+                "01d1ed695c3940ba",
+                "83c5b8d3d15e33f8"
+            ]
+        ]
+    },
+    {
+        "id": "b62c6f0f14885c7c",
+        "type": "debug",
+        "z": "30a93a76fd1944f1",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 400,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "3b802fabe93ee64c",
+        "type": "http in",
+        "z": "30a93a76fd1944f1",
+        "name": "POST curl1",
+        "url": "/crud",
+        "method": "post",
+        "upload": true,
+        "swaggerDoc": "",
+        "x": 190,
+        "y": 260,
+        "wires": [
+            [
+                "4c26f58a088323f5",
+                "b62c6f0f14885c7c"
+            ]
+        ]
+    },
+    {
+        "id": "d2be6aa930ed7ca0",
+        "type": "debug",
+        "z": "30a93a76fd1944f1",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 850,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "b6ca1cbaa442d830",
+        "type": "mysql",
+        "z": "30a93a76fd1944f1",
+        "mydb": "cbada9e3a1ba45d8",
+        "name": "",
+        "x": 620,
+        "y": 280,
+        "wires": [
+            [
+                "d2be6aa930ed7ca0",
+                "239bfb47bcea1ae3"
+            ]
+        ]
+    },
+    {
+        "id": "239bfb47bcea1ae3",
+        "type": "function",
+        "z": "30a93a76fd1944f1",
+        "name": "",
+        "func": "fields = [];\nvalues = [];\nif( msg.payload.insertId == undefined ){\n    var keys = Object.getOwnPropertyNames( msg.payload[0] );\n    for( var k=0;k<keys.length; k++){\n        fields.push({\"name\": keys[k],\n                    \"type\": \"time\",\n                    \"typeInfo\": {\n                      \"frame\": \"time.Time\"\n                    }});\n        values.push([]);\n    \n        for( var i=0; i<msg.payload.length; i++ ){\n            values[k][i] = msg.payload[i][keys[k]];\n            \n        }\n    }\n}else{\n    fields = [{name:\"insertId\"}];\n    values = [[msg.payload.insertId]];\n}\n\nrefId = msg.req.body.queries[0].refId;\ntr = {\n  \"results\": {\n    refId: {\n      \"frames\": [\n        {\n          \"schema\": {\n            \"refId\": \"A\",\n            \"fields\": fields\n          },\n          \"data\": {\n            \"values\": values\n          }\n        }\n      ]\n    }\n  }\n};\n\nm = tr;\n\nmsg.payload = m;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 790,
+        "y": 280,
+        "wires": [
+            [
+                "ff6fe80bd61653e9",
+                "d2be6aa930ed7ca0"
+            ]
+        ]
+    },
+    {
+        "id": "01d1ed695c3940ba",
+        "type": "debug",
+        "z": "30a93a76fd1944f1",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 610,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "35bd73a48b4eba0d",
+        "type": "debug",
+        "z": "30a93a76fd1944f1",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 610,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "83c5b8d3d15e33f8",
+        "type": "file",
+        "z": "30a93a76fd1944f1",
+        "name": "",
+        "filename": "",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "false",
+        "encoding": "none",
+        "x": 770,
+        "y": 460,
+        "wires": [
+            [
+                "83d2e55237b558a5",
+                "5a896e4aed11b328"
+            ]
+        ]
+    },
+    {
+        "id": "83d2e55237b558a5",
+        "type": "debug",
+        "z": "30a93a76fd1944f1",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 990,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "5a896e4aed11b328",
+        "type": "function",
+        "z": "30a93a76fd1944f1",
+        "name": "",
+        "func": "msg.payload = msg.nfilename;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 900,
+        "y": 400,
+        "wires": [
+            [
+                "ff6fe80bd61653e9"
+            ]
+        ]
+    },
+    {
+        "id": "cbada9e3a1ba45d8",
+        "type": "MySQLdatabase",
+        "name": "",
+        "host": "127.0.0.1",
+        "port": "3306",
+        "db": "svoiysh",
+        "tz": "",
+        "charset": "UTF8"
+    }
+]

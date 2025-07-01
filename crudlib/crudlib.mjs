@@ -11,18 +11,20 @@ class crudlib {
         this.prefix = 'abc';
         this.crudset = crudset;
         this.debClFunctions = true;
+        this.urlApiCrud = 'http://192.168.43.1:1880/crud';
+        this.urlHostFilesPath = 'http://192.168.43.1:3000/public/tmp/';
 
         cl(`crudlib->constructor... prefix:[${this.prefix}]`);cl(crudset);
 
         for(let f=0,fc=this.crudset.fields.length; f<fc; f++){
             if( this.crudset.fields[f].type == 'textinput' ){
-                this.crudset.fields[f].helper = new crudFieldTextInput( this.crudset.fields[f] );
+                this.crudset.fields[f].helper = new crudFieldTextInput( this, this.crudset.fields[f] );
             } else if( this.crudset.fields[f].type == 'checkbox' ){
-                this.crudset.fields[f].helper = new crudFieldCheckbox( this.crudset.fields[f] );
+                this.crudset.fields[f].helper = new crudFieldCheckbox( this, this.crudset.fields[f] );
             } else if( this.crudset.fields[f].type == 'select' ){
-                this.crudset.fields[f].helper = new crudFieldSelect( this.crudset.fields[f] );
+                this.crudset.fields[f].helper = new crudFieldSelect( this, this.crudset.fields[f] );
             } else if( this.crudset.fields[f].type == 'fileupload' ){
-                this.crudset.fields[f].helper = new crudFieldFileUpload( this.crudset.fields[f] );
+                this.crudset.fields[f].helper = new crudFieldFileUpload( this, this.crudset.fields[f] );
             }
         }
 
