@@ -218,6 +218,7 @@ class crudlib {
             }
 
         });
+        
     }
 
     clickTest( action, id ){

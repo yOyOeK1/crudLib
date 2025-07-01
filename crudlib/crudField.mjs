@@ -85,7 +85,9 @@ class crudFieldCheckbox extends crudField{
         return extractField( data, this.name )||0;
     }
 
-   
+   getViewFromData( data ){
+        return `<img src="./libs/images/ico_`+(data==1?'todo':'notdone')+`_16_16.png" />`;
+    }
 
 }
 
@@ -182,6 +184,13 @@ class crudFieldFileUpload extends crudField{
         });
 
         return fname;
+    }
+    getViewFromData( data ){
+        //return data+"-"+JSON.stringify(this.optOrg.options)+"<hr>"+
+        if( data != null )
+            return '<a href="http://192.168.43.1:3000/public/tmp/'+data+'" target="_blank">'+data+'</a>';
+        else
+            return data;
     }
 
 }
