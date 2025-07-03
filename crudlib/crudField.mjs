@@ -8,7 +8,11 @@ class crudField {
         this.name = options.name;
         this.value = options.value;
         this.type = options.type;
-        //console.log(`crudField..${this.name}`);
+        this.cl(`init..${this.name}`);
+    }
+
+    cl(obj){
+        console.log( this.constructor.name, "->\n", obj);
     }
 
     /* what field need to be as create data base as a column */
@@ -139,7 +143,7 @@ class crudFieldFileUpload extends crudField{
     }
 
     getAddField( action, value = '' ){
-        console.log("file upload DONE "+this.name+' val: '+value);
+        this.cl("getAddField DONE "+this.name+' val: '+value);
         let currentFile = '';
         if( value ){
             currentFile = `
@@ -148,10 +152,11 @@ class crudFieldFileUpload extends crudField{
                 <a 
                     class="ui-btn ui-btn-inline ui-mini ui-icon-delete ui-btn-icon-left"
                     id="${this.name}removebtn" 
-                    onclick="$('#${this.name}').attr('valueorg','');$('#${this.name}remove').fadeOut();">
-                    Remove file</a>
+                    onclick="$('#${this.name}').attr('valueorg','');$('#${this.name}remove').fadeOut();"
+                    >Remove file</a>
             </small>`;
         }
+
         return `
         <label for="${this.name}">${this.optOrg.caption}:</label>
         <input type="file" name="${this.name}" id="${this.name}" value="${value}" valueorg="${value}">
@@ -160,16 +165,17 @@ class crudFieldFileUpload extends crudField{
     }
 
     getValue( data ){
-        if( $('#fupload')[0].files[0] == undefined ){
+        let divObj = $(`#${this.name}`);
+        if( divObj[0].files[0] == undefined ){
             cl('upload no file');
-            return $('#fupload').attr('valueorg');
+            return divObj.attr('valueorg');
         }
         cl("do upload .... ");
         let formData = new FormData();
         let timestamp = Date.now();
-        let fname = timestamp+"_"+$('#fupload')[0].files[0].name;
+        let fname = timestamp+"_"+divObj[0].files[0].name;
         formData.append('sufix', timestamp);
-        formData.append('file1',$('#fupload')[0].files[0]);
+        formData.append('file1',divObj[0].files[0]);
         $.ajax({
             url: this.crudObj.urlApiCrud,
             type: "POST",

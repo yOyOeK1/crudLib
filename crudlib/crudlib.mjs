@@ -259,7 +259,7 @@ class crudlib {
                 else
                     tr+=ff.helper.getAddField( 'edit', res[ff.name] );
 
-            }else if( ff.type == 'html' ){
+            } else if( ff.type == 'html' ){
                 //tr+= '<div>'+ff.value+'</div>';
                 tr+= '<fieldset data-role="controlgroup">'+ff.value+'</fieldset>';
             }
